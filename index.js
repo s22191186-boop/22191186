@@ -54,27 +54,40 @@
 
   // ------- 读取你的 GeoJSON 文件（可登记多个）-------
   const DATA_FILES = [
-    { url: 'p05_22_13_4326.geojson', typeHint: '' }, // 你已导出的主数据（名称=P05_003, 地址=P05_004）
-    // { url: 'P7-13.geojson', typeHint: '博物館' },  // 如有博物館专用数据再打开
-  ];
+  { url: 'P27-13_1.geojson', typeHint: '' },  // 文化施設（有 TYPE/CITY/AREA）
+  { url: 'P05-22_1.geojson', typeHint: '' },  // 公民館・生涯学習 等（有 TYPE/CITY/AREA）
+];
+
 
   function fromGeoJSON(gj, typeHint, src){
-    if (!gj || !gj.features) return [];
-    const arr = [];
-    for (const f of gj.features){
-      if (!f.geometry || f.geometry.type!=='Point') continue;
-      const [lng,lat] = f.geometry.coordinates||[];
-      if (!Number.isFinite(lat)||!Number.isFinite(lng)) continue;
-      const p = f.properties||{};
-      const name = p.P05_003 || p.NAME || p.Name || p.名称 || p['施設名'] || '(名称不明)';
-      const addr = p.P05_004 || p.ADDRESS || p.Address || p.住所 || '';
-      const city = p.city || p['市区町村'] || p['自治体'] || guessCity(addr);
-      const uiTypeRaw = p.TYPE || p['種別'] || p['分類'] || '';
-      const uiType = mapUIButtonType(uiTypeRaw, typeHint);
-      arr.push({ name:String(name).trim(), addr, city, uiType, lat, lng, __src:src });
-    }
-    return arr;
+  if (!gj || !gj.features) return [];
+  const arr = [];
+  for (const f of gj.features){
+    if (!f.geometry || f.geometry.type!=='Point') continue;
+    const [lng,lat] = f.geometry.coordinates||[];
+    if (!Number.isFinite(lat)||!Number.isFinite(lng)) continue;
+    const p = f.properties||{};
+
+    // 名称/住所：兼容 P27/P05 的列名
+    const name = p.P27_005 || p.P05_003 || p.NAME || p.Name || p.名称 || '(名称不明)';
+    const addr = p.P27_006 || p.P05_004 || p.ADDRESS || p.Address || p.住所 || '';
+
+    // 你新加的列
+    const city = p.CITY || p['市区町村'] || p['自治体'] || guessCity(addr);
+    const area = p.AREA || regionOf(city);
+
+    // 类型：优先用 TYPE；没有时再做归一/兜底
+    const uiTypeRaw = p.TYPE || p['種別'] || p['分類'] || '';
+    const uiType = mapUIButtonType(uiTypeRaw, typeHint);
+
+    arr.push({
+      name: String(name).trim(),
+      addr, city, area, uiType, lat, lng, __src: src
+    });
   }
+  return arr;
+}
+
 
   async function loadOne(entry){
     const r = await fetch(entry.url);
@@ -86,11 +99,12 @@
   function render(records){
     // 过滤：四大区域 + 市区町村 + 类型
     const subset = records.filter(r => {
-      const okArea = areaSel ? regionOf(r.city) === areaSel : true;
-      const okCity = citySel ? r.city === citySel : true;
-      const okType = typeSel ? r.uiType === typeSel : true;
-      return okArea && okCity && okType;
+    const okArea = areaSel ? r.area === areaSel : true;   // ← 这里用 area
+    const okCity = citySel ? r.city === citySel : true;
+    const okType = typeSel ? r.uiType === typeSel : true;
+    return okArea && okCity && okType;
     });
+
 
     const group = L.featureGroup().addTo(map);
     subset.forEach(r=>{
