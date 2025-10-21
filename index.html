@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>生涯学習ナビ・入口</title>
+  <link rel="stylesheet" href="card-style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body {
+      background-image: url('346dac948338d683adae7f60ef9bceb3.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center center;
+    }
+    .selectbox:disabled { opacity: .6; }
+    .choice-btn.active {
+      outline: 2px solid #2fd0e22d;
+      background: #99dfd3;
+    }
+  </style>
+</head>
+<body>
+  <div class="concept-bg">
+    <div class="card-container">
+
+      <!-- 生涯学習の紹介 -->
+      <div class="concept-card card-page card-page-1 show" id="card1">
+        <h1>生涯学習とは？</h1>
+        <p>
+          生涯学習とは、年齢・職業・背景に関わらず、誰もがいつでもどこでも自由に学び続けることを指します。<br><br>
+          学校教育だけでなく、社会教育・家庭教育・文化・スポーツ活動・趣味やボランティア活動なども含まれます。
+        </p>
+        <ul>
+          <li>家庭・地域・職場など、あらゆる場での学び</li>
+          <li>自発的で多様な学習機会の提供</li>
+          <li>人生100年時代の自己成長・社会貢献</li>
+        </ul>
+        <button class="next-btn" id="nextToCard2">次へ &rarr;</button>
+      </div>
+
+      <!-- 選択肢-->
+      <div class="concept-card card-page card-page-2" id="card2">
+        <h1>今日はどんな施設を見てみたい？</h1>
+        <form class="select-form" id="searchForm" autocomplete="off">
+          <div class="form-row">
+            <label for="pref">東京都</label>
+            <select id="pref" class="selectbox">
+              <option value="">選択してください</option>
+              <option>東京都区部</option><option>多摩地域</option><option>西多摩郡</option>
+              <option>東京都島嶼部</option>
+            </select>
+          </div>
+
+          <!-- 市区町村 -->
+          <div class="form-row">
+            <label for="city">市区町村</label>
+            <select id="city" class="selectbox" disabled>
+              <option value="">（まず地域を選択）</option>
+            </select>
+          </div>
+
+
+
+          <div class="form-row">
+            <span>施設の種類</span>
+            <div class="choices">
+              <button type="button" class="choice-btn" data-type="博物館">博物館</button>
+              <button type="button" class="choice-btn" data-type="美術館">美術館</button>
+              <button type="button" class="choice-btn" data-type="図書館">図書館</button>
+              <button type="button" class="choice-btn" data-type="公民館">公民館</button>
+              <button type="button" class="choice-btn" data-type="資料館">資料館</button>
+              <button type="button" class="choice-btn" data-type="スポーツ施設">スポーツ施設</button>
+              <button type="button" class="choice-btn" data-type="生涯学習センター">生涯学習センター</button>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="back-btn" id="backToCard1">戻る</button>
+            <button type="submit" class="confirm-btn">確認</button>
+          </div>
+        </form>
+        <div id="alertBox" style="display:none; color:red; margin-top:1em;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
